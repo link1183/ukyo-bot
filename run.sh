@@ -1,0 +1,2 @@
+unset DEV
+cargo run

@@ -1,4 +1,4 @@
-use poise::serenity_prelude::{self as serenity};
+use poise::serenity_prelude::{self as serenity, FullEvent};
 
 mod message;
 mod reactions;
@@ -15,14 +15,17 @@ pub async fn event_handler(
     data: &types::Data,
 ) -> Result<(), types::Error> {
     match event {
-        serenity::FullEvent::Ready { data_about_bot, .. } => {
+        FullEvent::Ready { data_about_bot, .. } => {
             ready::ready(ctx, data_about_bot).await?;
         }
-        serenity::FullEvent::ReactionAdd { add_reaction } => {
+        FullEvent::ReactionAdd { add_reaction } => {
             reactions::reaction_add(ctx, data, add_reaction).await?;
         }
-        serenity::FullEvent::ReactionRemove { removed_reaction } => {
+        FullEvent::ReactionRemove { removed_reaction } => {
             reactions::reaction_remove(ctx, data, removed_reaction).await?;
+        }
+        FullEvent::GuildMemberAddition { new_member } => {
+            users::join(ctx, data, new_member).await?;
         }
         _ => {}
     }

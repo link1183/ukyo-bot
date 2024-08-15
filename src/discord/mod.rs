@@ -1,11 +1,16 @@
 use crate::config::Config;
 use crate::types::{self, Error};
 use poise::serenity_prelude::{self as serenity, GatewayIntents};
+use std::env;
 
 mod events;
 
 pub async fn discord_bot(config: Config) -> Result<(), Error> {
-    let intents = GatewayIntents::from_bits_truncate(268512320);
+    let intents = if env::var("DEV").is_ok() {
+        GatewayIntents::all()
+    } else {
+        GatewayIntents::from_bits_truncate(1719528745463031)
+    };
 
     let options = poise::FrameworkOptions {
         event_handler: |ctx, event, framework, data| {

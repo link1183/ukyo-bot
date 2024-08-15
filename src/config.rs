@@ -1,16 +1,25 @@
-#[derive(serde::Deserialize, serde::Serialize, Clone)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct ReactionRole {
     pub message_id: u64,
     pub role_id: u64,
     pub emote_name: String,
 }
 
-#[derive(serde::Deserialize, serde::Serialize, Clone)]
-pub struct Event {
-    pub reaction_role: Option<Vec<ReactionRole>>,
+#[derive(Deserialize, Serialize, Clone, Debug)]
+pub struct GuildJoin {
+    pub channel_id: u64,
+    pub role_id: u64,
 }
 
-#[derive(serde::Deserialize, serde::Serialize, Clone)]
+#[derive(Deserialize, Serialize, Clone, Debug)]
+pub struct Event {
+    pub reaction_role: Option<Vec<ReactionRole>>,
+    pub guild_join: Option<Vec<GuildJoin>>,
+}
+
+#[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct Config {
     pub discord_token: String,
     events: Option<Event>,
@@ -26,13 +35,7 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             discord_token: "".to_string(),
-            events: Some(Event {
-                reaction_role: Some(vec![ReactionRole {
-                    message_id: 0,
-                    role_id: 0,
-                    emote_name: "heart_on_fire".to_string(),
-                }]),
-            }),
+            events: None,
         }
     }
 }
