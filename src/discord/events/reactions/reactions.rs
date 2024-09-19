@@ -1,5 +1,6 @@
 use crate::types::{Data, Error};
 use poise::serenity_prelude::{self as serenity, Reaction};
+use regex::{Regex, RegexBuilder};
 
 fn parse_unicode_string(input: &str) -> String {
     let mut result = String::new();
@@ -50,25 +51,29 @@ pub async fn reaction_add(
     }
 
     let reaction_roles = events.clone().reaction_role.unwrap();
+    let regex_pattern = r"<:[a-zA-Z]+:\d+:>";
+    let re = Regex::new(regex_pattern).unwrap();
 
     for i in reaction_roles {
         let reaction_message = i.message_id;
         let role_id = i.role_id;
-        let emote_name = i.emote_name;
+        let mut emote_name = i.emote_name;
 
-        let emote_name = parse_unicode_string(emote_name.as_str());
+        if !re.is_match(emote_name.as_str()) {
+            emote_name = parse_unicode_string(emote_name.as_str());
+        }
 
         if add_reaction.message_id != reaction_message {
-            return Ok(());
+            continue;
         }
 
         if add_reaction.emoji.to_string() != emote_name {
-            return Ok(());
+            continue;
         }
 
         let guild_id = match add_reaction.guild_id {
             Some(t) => t,
-            None => return Ok(()),
+            None => continue,
         };
 
         let user_id = add_reaction
@@ -109,24 +114,29 @@ pub async fn reaction_remove(
 
     let reaction_roles = events.clone().reaction_role.unwrap();
 
+    let regex_pattern = r"<:[a-zA-Z]+:\d+:>";
+    let re = Regex::new(regex_pattern).unwrap();
+
     for i in reaction_roles {
         let reaction_message = i.message_id;
         let role_id = i.role_id;
-        let emote_name = i.emote_name;
+        let mut emote_name = i.emote_name;
 
-        let emote_name = parse_unicode_string(emote_name.as_str());
+        if !re.is_match(emote_name.as_str()) {
+            emote_name = parse_unicode_string(emote_name.as_str());
+        }
 
         if removed_reaction.message_id != reaction_message {
-            return Ok(());
+            continue;
         }
 
         if removed_reaction.emoji.to_string() != emote_name {
-            return Ok(());
+            continue;
         }
 
         let guild_id = match removed_reaction.guild_id {
             Some(t) => t,
-            None => return Ok(()),
+            None => continue,
         };
 
         let user_id = removed_reaction
