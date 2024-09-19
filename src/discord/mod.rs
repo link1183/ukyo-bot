@@ -1,8 +1,9 @@
 use crate::config::Config;
 use crate::types::{self, Error};
-use poise::serenity_prelude::{self as serenity, GatewayIntents};
+use poise::serenity_prelude::{self as serenity, GatewayIntents, GuildId};
 use std::env;
 
+mod cogs;
 mod events;
 
 pub async fn discord_bot(config: Config) -> Result<(), Error> {
@@ -13,6 +14,7 @@ pub async fn discord_bot(config: Config) -> Result<(), Error> {
     };
 
     let options = poise::FrameworkOptions {
+        commands: cogs::get_commands(),
         event_handler: |ctx, event, framework, data| {
             Box::pin(async move {
                 match events::event_handler(ctx, event, framework, data).await {
@@ -28,11 +30,21 @@ pub async fn discord_bot(config: Config) -> Result<(), Error> {
 
     let framework = poise::Framework::builder()
         .options(options)
-        .setup(|_ctx, _ready, _framework| {
+        .setup(|ctx, _ready, framework| {
             Box::pin(async move {
+                let guild_id: u64 = env::var("GUILD_ID")
+                    .expect("GUILD_ID must be set")
+                    .parse()
+                    .expect("GUILD_ID must be a valid u64");
+
+                let guild = GuildId::new(guild_id);
+
                 let data = types::Data {
                     config: config_clone,
                 };
+
+                poise::builtins::register_in_guild(&ctx, &framework.options().commands, guild)
+                    .await?;
                 Ok(data)
             })
         })

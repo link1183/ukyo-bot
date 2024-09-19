@@ -3,6 +3,7 @@ use anyhow::Result;
 mod config;
 mod types;
 mod utils;
+
 use std::env;
 
 #[tokio::main]
