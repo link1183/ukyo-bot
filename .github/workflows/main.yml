@@ -18,10 +18,6 @@ jobs:
       - name: connect
         run: ssh github@${{ secrets.SSH_HOST }}
       - name: pull
-        run: cd /home/github/bot && git checkout main && git pull
-      - name: stop and run
-        run: pkill -f run.sh && ./run.sh
-      - name: log out
-        run: exit
+        run: ssh github@${{ secrets.SSH_HOST }} "cd /home/github/bot && git checkout main && git pull && pkill -f run.sh && ./run.sh && exit"
       - name: cleanup
         run: rm -rf ~/.ssh
