@@ -2,20 +2,35 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
-  run_pull:
+  deploy:
     name: run pull
     runs-on: ubuntu-latest
 
     steps:
-      - name: install ssh keys
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+
+      - name: Setup SSH
         run: |
-          install -m 600 -D /dev/null ~/.ssh/id_rsa
+          mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
-      - name: pull
-        run: ssh github@${{ secrets.SSH_HOST }} "tmux attach \; send-keys C-c \; git checkout main && git pull && ./run.sh \; send-keys C-b \; send-keys d \; exit"
-      - name: cleanup
-        run: rm -rf ~/.ssh
+          chmod 600 ~/.ssh/id_rsa
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy
+        run: |
+          ssh github@${{ secrets.SSH_HOST }} << 'EOF'
+            cd ~/bot
+            git pull origin main
+            tmux has-session -t bot && tmux kill-session -t bot || true
+            tmux new-session -d -s bot './run.sh'
+          EOF
+
+      - name: Cleanup
+        run: |
+          rm -rf ~/.ssh
+          ssh-agent -k
