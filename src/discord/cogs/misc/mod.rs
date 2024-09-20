@@ -4,10 +4,14 @@ use crate::types::{Context, Error};
 use rand::Rng;
 
 #[poise::command(slash_command, guild_only)]
-pub async fn boot(ctx: Context<'_>, user: serenity::UserId) -> Result<(), Error> {
+pub async fn boot(ctx: Context<'_>, user: Option<serenity::UserId>) -> Result<(), Error> {
     let message: String;
-
     let random_number: f64 = rand::thread_rng().gen();
+
+    let user = match user {
+        Some(n) => n,
+        None => ctx.author().id,
+    };
 
     if random_number >= 0.98 {
         message = format!(
