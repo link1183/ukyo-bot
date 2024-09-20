@@ -16,6 +16,6 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
       - name: pull
-        run: ssh github@${{ secrets.SSH_HOST }} "tmux attach \; send-keys C-c \; git checkout main && git pull && ./run.sh && exit"
+        run: ssh github@${{ secrets.SSH_HOST }} "tmux attach \; send-keys C-c \; git checkout main && git pull && ./run.sh \; send-keys C-b \; send-keys d \; exit"
       - name: cleanup
         run: rm -rf ~/.ssh
