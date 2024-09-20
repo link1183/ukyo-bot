@@ -15,9 +15,7 @@ jobs:
           install -m 600 -D /dev/null ~/.ssh/id_rsa
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
-      - name: connect
-        run: ssh github@${{ secrets.SSH_HOST }}
       - name: pull
-        run: ssh github@${{ secrets.SSH_HOST }} "cd /home/github/bot && git checkout main && git pull && pkill -f run.sh && ./run.sh && exit"
+        run: ssh github@${{ secrets.SSH_HOST }} "tmux attach \; send-keys C-c \; git checkout main && git pull && ./run.sh && exit"
       - name: cleanup
         run: rm -rf ~/.ssh
