@@ -15,9 +15,9 @@ pub async fn boot(ctx: Context<'_>, user: serenity::UserId) -> Result<(), Error>
             user,
             (random_number * 100.0).round()
         );
-    } else if random_number <= 0.2 {
+    } else if random_number <= 0.02 {
         message = format!(
-            ":Pepega: :mega: <@&1286347092289130568> <@{}> is ABSOLUTELY NOT BOOTY ({}%)",
+            "<:Pepega:1286341573159948288> :mega: <@&1286347092289130568> <@{}> is ABSOLUTELY NOT BOOTY ({}%)",
             user,
             (random_number * 100.0).round()
         );
