@@ -32,9 +32,3 @@ pub async fn boot(ctx: Context<'_>, user: Option<serenity::UserId>) -> Result<()
     ctx.say(message).await.unwrap();
     Ok(())
 }
-
-#[poise::command(slash_command, guild_only)]
-pub async fn test(ctx: Context<'_>) -> Result<(), Error> {
-    ctx.say("Ok").await.unwrap();
-    Ok(())
-}
