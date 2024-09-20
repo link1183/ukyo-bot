@@ -33,4 +33,3 @@ jobs:
       - name: Cleanup
         run: |
           rm -rf ~/.ssh
-          ssh-agent -k
