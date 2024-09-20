@@ -18,7 +18,7 @@ jobs:
       - name: connect
         run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
       - name: pull
-        run: cd bot && git checkout main && git pull
+        run: cd /home/github/bot && git checkout main && git pull
       - name: stop and run
         run: pkill -f run.sh && ./run.sh
       - name: log out
