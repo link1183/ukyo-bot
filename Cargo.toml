@@ -18,3 +18,4 @@ anyhow = "1.0.86"
 rand = "0.8.5"
 chrono = { version = "0.4.38", features = ["serde"] }
 regex = "1.10.6"
+unic-emoji-char = "0.9.0"
