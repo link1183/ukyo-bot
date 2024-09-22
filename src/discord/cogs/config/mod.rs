@@ -92,6 +92,7 @@ pub async fn add_reaction_role(
 
 #[poise::command(slash_command, guild_only, required_permissions = "ADMINISTRATOR")]
 pub async fn config(ctx: Context<'_>) -> Result<(), Error> {
+    // TODO: Finish this
     let cfg = load_config();
 
     let mut embed = CreateEmbed::new().title("Configuration").color(0x00FF00);
