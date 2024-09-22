@@ -50,7 +50,7 @@ pub async fn reaction_add(ctx: &serenity::Context, add_reaction: &Reaction) -> R
     let regex_pattern = r"<:[a-zA-Z]+:\d+:>";
     let re = Regex::new(regex_pattern).unwrap();
 
-    for i in reaction_roles {
+    for (_, i) in reaction_roles {
         let reaction_message = i.message_id;
         let role_id = i.role_id;
         let mut emote_name = i.emote_name;
@@ -112,7 +112,7 @@ pub async fn reaction_remove(
     let regex_pattern = r"<:[a-zA-Z]+:\d+:>";
     let re = Regex::new(regex_pattern).unwrap();
 
-    for i in reaction_roles {
+    for (_, i) in reaction_roles {
         let reaction_message = i.message_id;
         let role_id = i.role_id;
         let mut emote_name = i.emote_name;

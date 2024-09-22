@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::env;
+use std::{collections::HashMap, env};
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct ReactionRole {
@@ -26,7 +26,7 @@ pub struct GuildJoin {
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct Event {
-    pub reaction_role: Option<Vec<ReactionRole>>,
+    pub reaction_role: Option<HashMap<String, ReactionRole>>,
     pub guild_join: Option<Vec<GuildJoin>>,
 }
 
