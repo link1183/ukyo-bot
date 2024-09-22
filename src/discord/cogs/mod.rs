@@ -4,5 +4,9 @@ mod config;
 mod misc;
 
 pub fn get_commands() -> Vec<poise::Command<Data, Error>> {
-    vec![misc::boot(), config::add_reaction_role(), config::config()]
+    vec![
+        misc::boot(),
+        config::reaction_role::add_reaction_role(),
+        config::get_config(),
+    ]
 }
