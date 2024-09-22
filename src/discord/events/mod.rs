@@ -1,6 +1,5 @@
 use poise::serenity_prelude::{self as serenity, FullEvent};
 
-mod message;
 mod reactions;
 mod ready;
 mod users;
@@ -19,10 +18,10 @@ pub async fn event_handler(
             ready::ready(ctx, data_about_bot).await?;
         }
         FullEvent::ReactionAdd { add_reaction } => {
-            reactions::reaction_add(ctx, data, add_reaction).await?;
+            reactions::reaction_add(ctx, add_reaction).await?;
         }
         FullEvent::ReactionRemove { removed_reaction } => {
-            reactions::reaction_remove(ctx, data, removed_reaction).await?;
+            reactions::reaction_remove(ctx, removed_reaction).await?;
         }
         FullEvent::GuildMemberAddition { new_member } => {
             users::join(ctx, data, new_member).await?;

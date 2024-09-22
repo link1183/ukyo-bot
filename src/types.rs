@@ -2,6 +2,7 @@ use crate::config::Config;
 use poise::Context as PoiseContext;
 use std::error::Error as StdError;
 
+#[derive(Debug)]
 pub struct Data {
     pub config: Config,
 }

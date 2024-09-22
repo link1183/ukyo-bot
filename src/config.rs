@@ -1,10 +1,21 @@
 use serde::{Deserialize, Serialize};
+use std::env;
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct ReactionRole {
     pub message_id: u64,
     pub role_id: u64,
     pub emote_name: String,
+}
+
+impl ReactionRole {
+    pub fn new(message_id: u64, role_id: u64, emote_name: String) -> Self {
+        ReactionRole {
+            message_id,
+            role_id,
+            emote_name,
+        }
+    }
 }
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
@@ -22,7 +33,7 @@ pub struct Event {
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct Config {
     pub discord_token: String,
-    events: Option<Event>,
+    pub events: Option<Event>,
 }
 
 impl Config {
@@ -38,4 +49,32 @@ impl Default for Config {
             events: None,
         }
     }
+}
+
+pub fn load_config() -> Config {
+    let app_name = "ukyo-bot";
+
+    let config_name: &str = if env::var("DEV").is_ok() {
+        "dev"
+    } else {
+        "config"
+    };
+
+    // Default config path: ~/.config/{app_name}/{config_name}.yml
+    let cfg: Config = confy::load(app_name, config_name).unwrap();
+    cfg
+}
+
+pub fn save_config(cfg: &Config) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    let app_name = "ukyo-bot";
+
+    let config_name: &str = if env::var("DEV").is_ok() {
+        "dev"
+    } else {
+        "config"
+    };
+
+    confy::store(app_name, config_name, cfg)?;
+
+    Ok(())
 }

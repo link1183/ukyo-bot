@@ -1,6 +1,6 @@
-use crate::types::{Data, Error};
+use crate::{config::load_config, types::Error};
 use poise::serenity_prelude::{self as serenity, Reaction};
-use regex::{Regex, RegexBuilder};
+use regex::Regex;
 
 fn parse_unicode_string(input: &str) -> String {
     let mut result = String::new();
@@ -32,12 +32,8 @@ fn parse_unicode_string(input: &str) -> String {
     result
 }
 
-pub async fn reaction_add(
-    ctx: &serenity::Context,
-    data: &Data,
-    add_reaction: &Reaction,
-) -> Result<(), Error> {
-    let config = data.config().clone();
+pub async fn reaction_add(ctx: &serenity::Context, add_reaction: &Reaction) -> Result<(), Error> {
+    let config = load_config();
     let events = config.events();
 
     if events.is_none() {
@@ -96,10 +92,9 @@ pub async fn reaction_add(
 
 pub async fn reaction_remove(
     ctx: &serenity::Context,
-    data: &Data,
     removed_reaction: &Reaction,
 ) -> Result<(), Error> {
-    let config = data.config().clone();
+    let config = load_config();
     let events = config.events();
 
     if events.is_none() {
