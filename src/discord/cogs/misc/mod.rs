@@ -1,6 +1,12 @@
 use poise::serenity_prelude as serenity;
 
-use crate::types::{Context, Error};
+use crate::{
+    db::crud::{
+        boot::create_boot,
+        users::{create_user, get_user_by_discord_id},
+    },
+    types::{Context, Error},
+};
 use rand::Rng;
 
 #[poise::command(slash_command, guild_only)]
@@ -30,5 +36,14 @@ pub async fn boot(ctx: Context<'_>, user: Option<serenity::UserId>) -> Result<()
     }
 
     ctx.say(message).await.unwrap();
+
+    if (get_user_by_discord_id(user.get()).await).is_none() {
+        create_user(user.get()).await;
+    };
+
+    let user_db = get_user_by_discord_id(user.get()).await.unwrap();
+
+    create_boot(user_db, random_number).await;
+
     Ok(())
 }

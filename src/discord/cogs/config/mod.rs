@@ -9,7 +9,6 @@ use std::collections::HashMap;
 
 #[poise::command(slash_command, guild_only, required_permissions = "ADMINISTRATOR")]
 pub async fn get_config(ctx: Context<'_>) -> Result<(), Error> {
-    // TODO: Finish this
     let cfg = load_config();
 
     let mut roles_embed = CreateEmbed::new().title("Reaction roles").color(0x00FF00);
