@@ -6,7 +6,7 @@ use poise::{
 };
 
 use crate::{
-    db::crud::boot::{get_all_boots_by_discord_id, get_leaderboard},
+    db::crud::boot::{get_all_boots_by_discord_id, get_leaderboard, get_loserboard},
     types::{Context, Error},
 };
 
@@ -26,6 +26,32 @@ pub async fn leaderboard(ctx: Context<'_>) -> Result<(), Error> {
         embed = embed.field(
             format!("{}. {}", i + 1, username),
             format!("{}%", (l.highest_score * 100.0).round()),
+            false,
+        );
+    }
+
+    let rep = CreateReply::default().embed(embed);
+
+    ctx.send(rep).await.unwrap();
+    Ok(())
+}
+
+#[poise::command(slash_command, guild_only)]
+pub async fn loserboard(ctx: Context<'_>) -> Result<(), Error> {
+    let lb = get_loserboard().await;
+    let mut embed = CreateEmbed::default()
+        .title("Booty loserboard")
+        .color(0x00FFFF);
+    for (i, l) in lb.iter().enumerate() {
+        let username = ctx
+            .http()
+            .get_user(UserId::new(l.discord_id))
+            .await
+            .unwrap()
+            .name;
+        embed = embed.field(
+            format!("{}. {}", i + 1, username),
+            format!("{}%", (l.lowest_score * 100.0).round()),
             false,
         );
     }

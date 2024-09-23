@@ -11,5 +11,6 @@ pub fn get_commands() -> Vec<poise::Command<Data, Error>> {
         config::reaction_role::add_reaction_role(),
         config::get_config(),
         stats::leaderboard(),
+        stats::loserboard(),
     ]
 }

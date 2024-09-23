@@ -7,7 +7,7 @@ use crate::{
         },
         get_connection,
     },
-    types::Leaderboard,
+    types::{Leaderboard, Loserboard},
 };
 use chrono::prelude::*;
 use sea_orm::{
@@ -40,6 +40,21 @@ pub async fn get_leaderboard() -> Vec<Leaderboard> {
         .group_by(users::Column::DiscordId)
         .order_by_desc(Expr::col(boot::Column::Score).max())
         .into_model::<Leaderboard>()
+        .all(&get_connection().await)
+        .await
+        .unwrap()
+}
+
+pub async fn get_loserboard() -> Vec<Loserboard> {
+    Users::find()
+        .column(users::Column::Id)
+        .column(users::Column::DiscordId)
+        .expr_as(Expr::col(boot::Column::Score).min(), "highest_score")
+        .inner_join(Boot)
+        .group_by(users::Column::Id)
+        .group_by(users::Column::DiscordId)
+        .order_by_asc(Expr::col(boot::Column::Score).min())
+        .into_model::<Loserboard>()
         .all(&get_connection().await)
         .await
         .unwrap()
