@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-use poise::serenity_prelude as serenity;
+use poise::serenity_prelude::{self as serenity, UserId};
 
 use crate::{
     db::crud::{boot::get_all_boots_by_discord_id, users::get_all_users},
@@ -25,6 +25,13 @@ pub async fn stats(ctx: Context<'_>, user: Option<serenity::UserId>) -> Result<(
         None => ctx.author().id.get(),
     };
 
+    let username = ctx
+        .http()
+        .get_user(UserId::new(discord_id))
+        .await
+        .unwrap()
+        .name;
+
     let boots = get_all_boots_by_discord_id(discord_id).await;
 
     if boots.is_none() {
@@ -38,7 +45,7 @@ pub async fn stats(ctx: Context<'_>, user: Option<serenity::UserId>) -> Result<(
 
     dbg!(total_score);
 
-    let average_score = total_score.round() / (boots.len() as f64);
+    let average_score = (total_score.round() / (boots.len() as f64) * 100.0).round() / 100.0;
     let min = (boots
         .iter()
         .min_by(|a, b| a.score.partial_cmp(&b.score).unwrap_or(Ordering::Equal))
@@ -56,8 +63,8 @@ pub async fn stats(ctx: Context<'_>, user: Option<serenity::UserId>) -> Result<(
     let count = boots.len();
 
     let msg = format!(
-        "Count: {}\nMin: {}%\nMax: {}%\nAverage: {}%",
-        count, min, max, average_score
+        "User: {}, Count: {}\nMin: {}%\nMax: {}%\nAverage: {}%",
+        username, count, min, max, average_score
     );
 
     ctx.say(msg).await.unwrap();
