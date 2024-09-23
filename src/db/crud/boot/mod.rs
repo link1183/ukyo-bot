@@ -1,7 +1,7 @@
 use crate::db::{
     entity::{
-        boot, boot::ActiveModel as BootActiveModel, boot::Entity as BootEntity,
-        boot::Model as BootModel, users::Model as UserModel,
+        boot, boot::ActiveModel as BootActiveModel, boot::Model as BootModel, prelude::Boot,
+        users::Model as UserModel,
     },
     get_connection,
 };
@@ -29,7 +29,7 @@ pub async fn get_all_boots_by_discord_id(discord_id: u64) -> Option<Vec<BootMode
     match user.is_none() {
         true => None,
         false => Some(
-            BootEntity::find()
+            Boot::find()
                 .filter(boot::Column::UserId.eq(user.unwrap().id))
                 .all(&get_connection().await)
                 .await

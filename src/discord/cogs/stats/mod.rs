@@ -3,9 +3,20 @@ use std::cmp::Ordering;
 use poise::serenity_prelude as serenity;
 
 use crate::{
-    db::crud::boot::get_all_boots_by_discord_id,
+    db::crud::{boot::get_all_boots_by_discord_id, users::get_all_users},
     types::{Context, Error},
 };
+
+#[poise::command(slash_command, guild_only, required_permissions = "ADMINISTRATOR")]
+pub async fn get_users(ctx: Context<'_>) -> Result<(), Error> {
+    let users = get_all_users().await;
+
+    dbg!(users);
+
+    ctx.say("Hey").await.unwrap();
+
+    Ok(())
+}
 
 #[poise::command(slash_command, guild_only)]
 pub async fn stats(ctx: Context<'_>, user: Option<serenity::UserId>) -> Result<(), Error> {
@@ -23,9 +34,11 @@ pub async fn stats(ctx: Context<'_>, user: Option<serenity::UserId>) -> Result<(
 
     let boots = boots.unwrap();
 
-    let total_score: f64 = boots.iter().map(|boot| boot.score).sum();
+    let total_score: f64 = boots.iter().map(|boot| (boot.score * 100.0).round()).sum();
 
-    let average_score = ((total_score / boots.len() as f64) * 10000.0).round() / 100.0;
+    dbg!(total_score);
+
+    let average_score = (total_score.round() / (boots.len() as f64)).round();
     let min = (boots
         .iter()
         .min_by(|a, b| a.score.partial_cmp(&b.score).unwrap_or(Ordering::Equal))
