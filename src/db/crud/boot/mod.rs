@@ -49,7 +49,7 @@ pub async fn get_loserboard() -> Vec<Loserboard> {
     Users::find()
         .column(users::Column::Id)
         .column(users::Column::DiscordId)
-        .expr_as(Expr::col(boot::Column::Score).min(), "highest_score")
+        .expr_as(Expr::col(boot::Column::Score).min(), "lowest_score")
         .inner_join(Boot)
         .group_by(users::Column::Id)
         .group_by(users::Column::DiscordId)
