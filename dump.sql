@@ -1,6 +1,9 @@
+DROP TABLE `boot`;
+DROP TABLE `users`;
+
 CREATE TABLE IF NOT EXISTS `users` (
 	`id` int AUTO_INCREMENT NOT NULL UNIQUE,
-	`discord_id` bigint NOT NULL UNIQUE,
+	`discord_id` bigint UNSIGNED NOT NULL UNIQUE,
 	PRIMARY KEY (`id`)
 );
 
