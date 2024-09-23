@@ -1,6 +1,9 @@
 use std::cmp::Ordering;
 
-use poise::serenity_prelude::{self as serenity, UserId};
+use poise::{
+    serenity_prelude::{self as serenity, CreateEmbed, UserId},
+    CreateReply,
+};
 
 use crate::{
     db::crud::{boot::get_all_boots_by_discord_id, users::get_all_users},
@@ -62,12 +65,17 @@ pub async fn stats(ctx: Context<'_>, user: Option<serenity::UserId>) -> Result<(
         .round();
     let count = boots.len();
 
-    let msg = format!(
-        "User: {}, Count: {}\nMin: {}%\nMax: {}%\nAverage: {}%",
-        username, count, min, max, average_score
-    );
+    let embed = CreateEmbed::default()
+        .title(format!("Booty stats for {}", username))
+        .color(0x00FF00)
+        .field("Count", count.to_string(), false)
+        .field("Lowest boot", format!("{}%", min), false)
+        .field("Highest boot", format!("{}%", max), false)
+        .field("Average boot", format!("{}%", average_score), false);
 
-    ctx.say(msg).await.unwrap();
+    let rep = CreateReply::default().embed(embed);
+
+    ctx.send(rep).await.unwrap();
 
     Ok(())
 }
