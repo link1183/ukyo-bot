@@ -6,18 +6,33 @@ use poise::{
 };
 
 use crate::{
-    db::crud::{boot::get_all_boots_by_discord_id, users::get_all_users},
+    db::crud::boot::{get_all_boots_by_discord_id, get_leaderboard},
     types::{Context, Error},
 };
 
-#[poise::command(slash_command, guild_only, required_permissions = "ADMINISTRATOR")]
-pub async fn get_users(ctx: Context<'_>) -> Result<(), Error> {
-    let users = get_all_users().await;
+#[poise::command(slash_command, guild_only)]
+pub async fn leaderboard(ctx: Context<'_>) -> Result<(), Error> {
+    let lb = get_leaderboard().await;
+    let mut embed = CreateEmbed::default()
+        .title("Booty leaderboard")
+        .color(0x00FFFF);
+    for (i, l) in lb.iter().enumerate() {
+        let username = ctx
+            .http()
+            .get_user(UserId::new(l.discord_id))
+            .await
+            .unwrap()
+            .name;
+        embed = embed.field(
+            format!("{}. {}", i + 1, username),
+            format!("{}%", (l.highest_score * 100.0).round()),
+            false,
+        );
+    }
 
-    dbg!(users);
+    let rep = CreateReply::default().embed(embed);
 
-    ctx.say("Hey").await.unwrap();
-
+    ctx.send(rep).await.unwrap();
     Ok(())
 }
 
@@ -45,8 +60,6 @@ pub async fn stats(ctx: Context<'_>, user: Option<serenity::UserId>) -> Result<(
     let boots = boots.unwrap();
 
     let total_score: f64 = boots.iter().map(|boot| (boot.score * 100.0).round()).sum();
-
-    dbg!(total_score);
 
     let average_score = (total_score.round() / (boots.len() as f64) * 100.0).round() / 100.0;
     let min = (boots

@@ -1,5 +1,6 @@
 use crate::config::Config;
 use poise::Context as PoiseContext;
+use sea_orm::FromQueryResult;
 use std::error::Error as StdError;
 
 #[derive(Debug)]
@@ -11,6 +12,13 @@ impl Data {
     pub fn config(&self) -> &Config {
         &self.config
     }
+}
+
+#[derive(Debug, FromQueryResult)]
+pub struct Leaderboard {
+    pub id: i32,
+    pub discord_id: u64,
+    pub highest_score: f64,
 }
 
 pub type Error = Box<dyn StdError + Send + Sync>;

@@ -1,12 +1,19 @@
-use crate::db::{
-    entity::{
-        boot, boot::ActiveModel as BootActiveModel, boot::Model as BootModel, prelude::Boot,
-        users::Model as UserModel,
+use crate::{
+    db::{
+        entity::{
+            boot::{self, ActiveModel as BootActiveModel, Model as BootModel},
+            prelude::{Boot, Users},
+            users::{self, Model as UserModel},
+        },
+        get_connection,
     },
-    get_connection,
+    types::Leaderboard,
 };
 use chrono::prelude::*;
-use sea_orm::{ActiveModelTrait, ActiveValue::Set, ColumnTrait, EntityTrait, QueryFilter};
+use sea_orm::{
+    sea_query::Expr, ActiveModelTrait, ActiveValue::Set, ColumnTrait, EntityTrait, QueryFilter,
+    QueryOrder, QuerySelect,
+};
 
 use super::users::get_user_by_discord_id;
 
@@ -21,6 +28,21 @@ pub async fn create_boot(user: UserModel, prob: f64) {
     };
 
     boot.insert(&get_connection().await).await.unwrap();
+}
+
+pub async fn get_leaderboard() -> Vec<Leaderboard> {
+    Users::find()
+        .column(users::Column::Id)
+        .column(users::Column::DiscordId)
+        .expr_as(Expr::col(boot::Column::Score).max(), "highest_score")
+        .inner_join(Boot)
+        .group_by(users::Column::Id)
+        .group_by(users::Column::DiscordId)
+        .order_by_desc(Expr::col(boot::Column::Score).max())
+        .into_model::<Leaderboard>()
+        .all(&get_connection().await)
+        .await
+        .unwrap()
 }
 
 pub async fn get_all_boots_by_discord_id(discord_id: u64) -> Option<Vec<BootModel>> {
