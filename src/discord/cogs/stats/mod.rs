@@ -38,7 +38,7 @@ pub async fn stats(ctx: Context<'_>, user: Option<serenity::UserId>) -> Result<(
 
     dbg!(total_score);
 
-    let average_score = (total_score.round() / (boots.len() as f64)).round();
+    let average_score = total_score.round() / (boots.len() as f64);
     let min = (boots
         .iter()
         .min_by(|a, b| a.score.partial_cmp(&b.score).unwrap_or(Ordering::Equal))
