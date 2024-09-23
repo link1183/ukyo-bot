@@ -1,9 +1,14 @@
 use crate::db::{
-    entity::{boot::ActiveModel as BootActiveModel, users::Model as UserModel},
+    entity::{
+        boot, boot::ActiveModel as BootActiveModel, boot::Entity as BootEntity,
+        boot::Model as BootModel, users::Model as UserModel,
+    },
     get_connection,
 };
 use chrono::prelude::*;
-use sea_orm::{ActiveModelTrait, ActiveValue::Set};
+use sea_orm::{ActiveModelTrait, ActiveValue::Set, ColumnTrait, EntityTrait, QueryFilter};
+
+use super::users::get_user_by_discord_id;
 
 pub async fn create_boot(user: UserModel, prob: f64) {
     let now = Utc::now().naive_utc();
@@ -16,4 +21,19 @@ pub async fn create_boot(user: UserModel, prob: f64) {
     };
 
     boot.insert(&get_connection().await).await.unwrap();
+}
+
+pub async fn get_all_boots_by_discord_id(discord_id: u64) -> Option<Vec<BootModel>> {
+    let user = get_user_by_discord_id(discord_id).await;
+
+    match user.is_none() {
+        true => None,
+        false => Some(
+            BootEntity::find()
+                .filter(boot::Column::UserId.eq(user.unwrap().id))
+                .all(&get_connection().await)
+                .await
+                .unwrap(),
+        ),
+    }
 }
