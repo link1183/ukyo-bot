@@ -39,7 +39,7 @@ jobs:
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             cd ~/bot
-            tmux has-session -t bot && tmux kill-session -t bot || true
+            tmux has-session -t bot && tmux kill-session -t bot
             tmux new-session -d -s bot './run.sh'
           EOF
 
