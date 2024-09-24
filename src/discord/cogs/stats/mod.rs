@@ -1,7 +1,7 @@
 use std::cmp::Ordering;
 
 use poise::{
-    serenity_prelude::{self as serenity, CreateEmbed},
+    serenity_prelude::{self as serenity, CreateEmbed, Mentionable, UserId},
     CreateReply,
 };
 
@@ -37,8 +37,13 @@ pub async fn loserboard(ctx: Context<'_>) -> Result<(), Error> {
         .title("Booty loserboard")
         .color(0x00FFFF);
     for (i, l) in lb.iter().enumerate() {
+        let username = ctx
+            .http()
+            .get_user(UserId::new(l.discord_id))
+            .await
+            .unwrap();
         embed = embed.field(
-            format!("{}. <@{}>", i + 1, l.discord_id),
+            format!("{}. {}", i + 1, username.mention()),
             format!("{}%", (l.lowest_score * 100.0).round()),
             false,
         );
@@ -56,6 +61,8 @@ pub async fn stats(ctx: Context<'_>, user: Option<serenity::UserId>) -> Result<(
         Some(u) => u.get(),
         None => ctx.author().id.get(),
     };
+
+    let username = ctx.http().get_user(UserId::new(discord_id)).await.unwrap();
 
     let boots = get_all_boots_by_discord_id(discord_id).await;
 
@@ -86,7 +93,7 @@ pub async fn stats(ctx: Context<'_>, user: Option<serenity::UserId>) -> Result<(
     let count = boots.len();
 
     let embed = CreateEmbed::default()
-        .title(format!("Booty stats for <@{}>", discord_id))
+        .title(format!("Booty stats for {}", username.mention()))
         .color(0x00FF00)
         .field("Count", count.to_string(), false)
         .field("Lowest boot", format!("{}%", min), false)
