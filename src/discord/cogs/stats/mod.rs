@@ -98,7 +98,8 @@ pub async fn stats(ctx: Context<'_>, user: Option<serenity::UserId>) -> Result<(
     let count = boots.len();
 
     let embed = CreateEmbed::default()
-        .title(format!("Booty stats for {}", username.mention()))
+        .title("Booty stats")
+        .description(format!("{}'s stats", username.mention()))
         .color(0x00FF00)
         .field("Count", count.to_string(), false)
         .field("Lowest boot", format!("{}%", min), false)
