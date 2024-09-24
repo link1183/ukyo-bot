@@ -28,6 +28,12 @@ pub async fn boot(ctx: Context<'_>) -> Result<(), Error> {
             user,
             (random_number * 100.0).round()
         );
+    } else if (random_number * 100.0).round() == 69.0 {
+        message = format!(
+            "<:Pepega:1286341573159948288> :mega: <@&1286347092289130568> <@{}> is a NICE booty ({}%)",
+            user,
+            (random_number * 100.0).round()
+        );
     } else {
         message = format!("{} is {}% booty", user, (random_number * 100.0).round());
     }
