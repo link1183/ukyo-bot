@@ -73,6 +73,11 @@ pub async fn stats(ctx: Context<'_>, user: Option<serenity::UserId>) -> Result<(
 
     let boots = boots.unwrap();
 
+    let number_of_69: Vec<_> = boots
+        .iter()
+        .filter(|boot| (boot.score * 100.0).round() == 69.0)
+        .collect();
+
     let total_score: f64 = boots.iter().map(|boot| (boot.score * 100.0).round()).sum();
 
     let average_score = (total_score.round() / (boots.len() as f64) * 100.0).round() / 100.0;
@@ -98,7 +103,8 @@ pub async fn stats(ctx: Context<'_>, user: Option<serenity::UserId>) -> Result<(
         .field("Count", count.to_string(), false)
         .field("Lowest boot", format!("{}%", min), false)
         .field("Highest boot", format!("{}%", max), false)
-        .field("Average boot", format!("{}%", average_score), false);
+        .field("Average boot", format!("{}%", average_score), false)
+        .field("Number of 69", number_of_69.len().to_string(), false);
 
     let rep = CreateReply::default().embed(embed);
 
