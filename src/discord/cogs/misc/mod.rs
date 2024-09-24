@@ -29,7 +29,7 @@ pub async fn boot(ctx: Context<'_>) -> Result<(), Error> {
             (random_number * 100.0).round()
         );
     } else {
-        message = format!("<@{}> is {}% booty", user, (random_number * 100.0).round());
+        message = format!("{} is {}% booty", user, (random_number * 100.0).round());
     }
 
     ctx.say(message).await.unwrap();
