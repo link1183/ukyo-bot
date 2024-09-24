@@ -1,7 +1,7 @@
 use std::cmp::Ordering;
 
 use poise::{
-    serenity_prelude::{self as serenity, CreateEmbed, UserId},
+    serenity_prelude::{self as serenity, CreateEmbed},
     CreateReply,
 };
 
@@ -17,14 +17,8 @@ pub async fn leaderboard(ctx: Context<'_>) -> Result<(), Error> {
         .title("Booty leaderboard")
         .color(0x00FFFF);
     for (i, l) in lb.iter().enumerate() {
-        let username = ctx
-            .http()
-            .get_user(UserId::new(l.discord_id))
-            .await
-            .unwrap()
-            .name;
         embed = embed.field(
-            format!("{}. {}", i + 1, username),
+            format!("{}. <@{}>", i + 1, l.discord_id),
             format!("{}%", (l.highest_score * 100.0).round()),
             false,
         );
@@ -43,14 +37,8 @@ pub async fn loserboard(ctx: Context<'_>) -> Result<(), Error> {
         .title("Booty loserboard")
         .color(0x00FFFF);
     for (i, l) in lb.iter().enumerate() {
-        let username = ctx
-            .http()
-            .get_user(UserId::new(l.discord_id))
-            .await
-            .unwrap()
-            .name;
         embed = embed.field(
-            format!("{}. {}", i + 1, username),
+            format!("{}. <@{}>", i + 1, l.discord_id),
             format!("{}%", (l.lowest_score * 100.0).round()),
             false,
         );
@@ -68,13 +56,6 @@ pub async fn stats(ctx: Context<'_>, user: Option<serenity::UserId>) -> Result<(
         Some(u) => u.get(),
         None => ctx.author().id.get(),
     };
-
-    let username = ctx
-        .http()
-        .get_user(UserId::new(discord_id))
-        .await
-        .unwrap()
-        .name;
 
     let boots = get_all_boots_by_discord_id(discord_id).await;
 
@@ -105,7 +86,7 @@ pub async fn stats(ctx: Context<'_>, user: Option<serenity::UserId>) -> Result<(
     let count = boots.len();
 
     let embed = CreateEmbed::default()
-        .title(format!("Booty stats for {}", username))
+        .title(format!("Booty stats for <@{}>", discord_id))
         .color(0x00FF00)
         .field("Count", count.to_string(), false)
         .field("Lowest boot", format!("{}%", min), false)
