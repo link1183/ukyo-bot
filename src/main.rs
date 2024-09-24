@@ -1,7 +1,6 @@
-mod discord;
-use anyhow::Result;
 mod config;
 mod db;
+mod discord;
 mod types;
 mod utils;
 

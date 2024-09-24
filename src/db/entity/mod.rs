@@ -3,4 +3,5 @@
 pub mod prelude;
 
 pub mod boot;
+pub mod messages;
 pub mod users;

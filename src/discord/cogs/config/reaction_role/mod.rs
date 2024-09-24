@@ -1,6 +1,5 @@
 use crate::config::{load_config, save_config, Event, ReactionRole};
 use crate::types::{Context, Error};
-use anyhow::Result;
 use poise::serenity_prelude::{MessageId, RoleId};
 use regex::Regex;
 use std::collections::HashMap;

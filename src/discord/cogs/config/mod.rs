@@ -2,7 +2,6 @@ pub mod reaction_role;
 
 use crate::config::load_config;
 use crate::types::{Context, Error};
-use anyhow::Result;
 use poise::serenity_prelude::{ChannelId, CreateEmbed};
 use poise::CreateReply;
 use std::collections::HashMap;

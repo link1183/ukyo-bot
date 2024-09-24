@@ -17,8 +17,13 @@ pub async fn leaderboard(ctx: Context<'_>) -> Result<(), Error> {
         .title("Booty leaderboard")
         .color(0x00FFFF);
     for (i, l) in lb.iter().enumerate() {
+        let username = ctx
+            .http()
+            .get_user(UserId::new(l.discord_id))
+            .await
+            .unwrap();
         embed = embed.field(
-            format!("{}. <@{}>", i + 1, l.discord_id),
+            format!("{}. {}", i + 1, username),
             format!("{}%", (l.highest_score * 100.0).round()),
             false,
         );
