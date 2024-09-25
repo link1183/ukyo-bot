@@ -1,3 +1,3 @@
-mod reactions;
-pub use reactions::reaction_add;
-pub use reactions::reaction_remove;
+mod reaction_events;
+pub use reaction_events::reaction_add;
+pub use reaction_events::reaction_remove;

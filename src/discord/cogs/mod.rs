@@ -1,6 +1,7 @@
 use crate::types::{Data, Error};
 
 mod config;
+mod messages;
 mod misc;
 mod stats;
 
@@ -12,5 +13,6 @@ pub fn get_commands() -> Vec<poise::Command<Data, Error>> {
         config::get_config(),
         stats::leaderboard(),
         stats::loserboard(),
+        messages::submit(),
     ]
 }

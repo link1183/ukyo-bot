@@ -2,7 +2,6 @@ mod config;
 mod db;
 mod discord;
 mod types;
-mod utils;
 
 #[tokio::main]
 async fn main() -> Result<(), confy::ConfyError> {

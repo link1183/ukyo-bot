@@ -13,6 +13,7 @@ pub async fn join(ctx: &Context, data: &Data, new_member: &Member) -> Result<(),
         return Ok(());
     }
 
+    // Can safely unwrap there
     let events = events.clone().unwrap();
 
     if events.guild_join.is_none() {
@@ -22,6 +23,7 @@ pub async fn join(ctx: &Context, data: &Data, new_member: &Member) -> Result<(),
     let guild_join = events.guild_join.clone().unwrap();
 
     for i in guild_join {
+        // TODO: Implement the messages from the database there
         let join_message = "Welcome {user} to the boots gang";
 
         let channel_id = i.channel_id;
@@ -35,6 +37,7 @@ pub async fn join(ctx: &Context, data: &Data, new_member: &Member) -> Result<(),
             }
         }
 
+        // Forced to gen the RNG in a block like this as it messes up with other stuff
         let (red, green, blue) = tokio::task::spawn_blocking(|| {
             let mut rng = rand::thread_rng();
             let red = rng.gen_range(0..255);
@@ -42,8 +45,7 @@ pub async fn join(ctx: &Context, data: &Data, new_member: &Member) -> Result<(),
             let blue = rng.gen_range(0..255);
             (red, green, blue)
         })
-        .await
-        .unwrap();
+        .await?;
 
         let title = join_message.replace("{user}", new_member.display_name());
 
@@ -54,15 +56,10 @@ pub async fn join(ctx: &Context, data: &Data, new_member: &Member) -> Result<(),
         let message = CreateMessage::new().embed(embed);
 
         let channel = ChannelId::new(channel_id);
-        let sent_message = channel.send_message(&ctx, message).await;
+        channel.send_message(&ctx, message).await?;
 
-        if let Err(e) = sent_message {
-            eprintln!("An error occured sending the message: {e}")
-        }
-
-        if let Err(e) = new_member.add_role(ctx, role_id).await {
-            eprintln!("Role with specified ID doesn't exist: {e}");
-        };
+        // TODO: Implement logging
+        new_member.add_role(ctx, role_id).await?;
     }
 
     Ok(())

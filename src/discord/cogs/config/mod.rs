@@ -13,11 +13,7 @@ pub async fn get_config(ctx: Context<'_>) -> Result<(), Error> {
     let mut roles_embed = CreateEmbed::new().title("Reaction roles").color(0x00FF00);
     let mut guild_embed = CreateEmbed::new().title("Guild joins").color(0x00FF00);
 
-    let roles = ctx
-        .http()
-        .get_guild_roles(ctx.guild_id().unwrap())
-        .await
-        .unwrap();
+    let roles = ctx.http().get_guild_roles(ctx.guild_id().unwrap()).await?;
 
     let role_map: HashMap<u64, String> = roles
         .into_iter()

@@ -6,13 +6,17 @@ use poise::{
 };
 
 use crate::{
-    db::crud::boot::{get_all_boots_by_discord_id, get_leaderboard, get_loserboard},
+    db::{
+        crud::boot::{get_all_boots_by_discord_id, get_leaderboard, get_loserboard},
+        get_connection,
+    },
     types::{Context, Error},
 };
 
 #[poise::command(slash_command, guild_only)]
 pub async fn leaderboard(ctx: Context<'_>) -> Result<(), Error> {
-    let lb = get_leaderboard().await;
+    let conn = get_connection().await;
+    let lb = get_leaderboard(conn).await;
     let mut embed = CreateEmbed::default()
         .title("Booty leaderboard")
         .color(0x00FFFF);
@@ -31,13 +35,14 @@ pub async fn leaderboard(ctx: Context<'_>) -> Result<(), Error> {
 
     let rep = CreateReply::default().embed(embed);
 
-    ctx.send(rep).await.unwrap();
+    ctx.send(rep).await?;
     Ok(())
 }
 
 #[poise::command(slash_command, guild_only)]
 pub async fn loserboard(ctx: Context<'_>) -> Result<(), Error> {
-    let lb = get_loserboard().await;
+    let conn = get_connection().await;
+    let lb = get_loserboard(conn).await;
     let mut embed = CreateEmbed::default()
         .title("Booty loserboard")
         .color(0x00FFFF);
@@ -56,12 +61,13 @@ pub async fn loserboard(ctx: Context<'_>) -> Result<(), Error> {
 
     let rep = CreateReply::default().embed(embed);
 
-    ctx.send(rep).await.unwrap();
+    ctx.send(rep).await?;
     Ok(())
 }
 
 #[poise::command(slash_command, guild_only)]
 pub async fn stats(ctx: Context<'_>, user: Option<serenity::UserId>) -> Result<(), Error> {
+    let conn = get_connection().await;
     let discord_id = match user {
         Some(u) => u.get(),
         None => ctx.author().id.get(),
@@ -69,7 +75,7 @@ pub async fn stats(ctx: Context<'_>, user: Option<serenity::UserId>) -> Result<(
 
     let username = ctx.http().get_user(UserId::new(discord_id)).await.unwrap();
 
-    let boots = get_all_boots_by_discord_id(discord_id).await;
+    let boots = get_all_boots_by_discord_id(conn, discord_id).await;
 
     if boots.is_none() {
         ctx.say("No score registered for that user").await.unwrap();
@@ -114,7 +120,7 @@ pub async fn stats(ctx: Context<'_>, user: Option<serenity::UserId>) -> Result<(
 
     let rep = CreateReply::default().embed(embed);
 
-    ctx.send(rep).await.unwrap();
+    ctx.send(rep).await?;
 
     Ok(())
 }

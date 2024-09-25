@@ -52,8 +52,7 @@ pub async fn discord_bot(config: Config) -> Result<(), Error> {
 
     let mut client = serenity::ClientBuilder::new(&config.discord_token, intents)
         .framework(framework)
-        .await
-        .unwrap();
+        .await?;
 
     match client.start().await {
         Ok(_) => Ok(()),

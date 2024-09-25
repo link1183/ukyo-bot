@@ -6,11 +6,10 @@ mod users;
 
 use crate::types;
 
-#[allow(unused)]
 pub async fn event_handler(
     ctx: &serenity::Context,
     event: &serenity::FullEvent,
-    framework: poise::FrameworkContext<'_, types::Data, types::Error>,
+    _framework: poise::FrameworkContext<'_, types::Data, types::Error>,
     data: &types::Data,
 ) -> Result<(), types::Error> {
     match event {

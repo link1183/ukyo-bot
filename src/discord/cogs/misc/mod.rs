@@ -1,7 +1,10 @@
 use crate::{
-    db::crud::{
-        boot::create_boot,
-        users::{create_user, get_user_by_discord_id},
+    db::{
+        crud::{
+            boot::create_boot,
+            users::{create_user, get_user_by_discord_id},
+        },
+        get_connection,
     },
     types::{Context, Error},
 };
@@ -10,6 +13,7 @@ use rand::Rng;
 
 #[poise::command(slash_command, guild_only)]
 pub async fn boot(ctx: Context<'_>) -> Result<(), Error> {
+    let conn = get_connection().await;
     let message: String;
     let random_number: f64 = rand::thread_rng().gen();
 
@@ -38,15 +42,15 @@ pub async fn boot(ctx: Context<'_>) -> Result<(), Error> {
         message = format!("{} is {}% booty", user, (random_number * 100.0).round());
     }
 
-    ctx.say(message).await.unwrap();
+    ctx.say(message).await?;
 
-    if (get_user_by_discord_id(user_id.get()).await).is_none() {
-        create_user(user_id.get()).await;
+    let user_db = get_user_by_discord_id(conn.clone(), user_id.get()).await;
+
+    if user_db.is_none() {
+        create_user(conn.clone(), user_id.get()).await;
     };
 
-    let user_db = get_user_by_discord_id(user_id.get()).await.unwrap();
-
-    create_boot(user_db, random_number).await;
+    create_boot(user_db.unwrap(), random_number).await;
 
     Ok(())
 }

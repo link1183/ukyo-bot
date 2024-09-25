@@ -27,7 +27,7 @@ pub async fn add_reaction_role(
         || is_emoji(emote.chars().next().unwrap());
 
     if !is_valid_emoji {
-        let msg = ctx.say("Please enter a valid emoji").await.unwrap();
+        let msg = ctx.say("Please enter a valid emoji").await?;
         sleep(Duration::from_secs(5)).await;
         msg.delete(ctx).await?;
         return Ok(());
@@ -56,9 +56,9 @@ pub async fn add_reaction_role(
     {
         Ok(msg) => msg,
         Err(_) => {
-            let msg = ctx.say("Please provide a valid message ID").await.unwrap();
+            let msg = ctx.say("Please provide a valid message ID").await?;
             sleep(Duration::from_secs(5)).await;
-            msg.delete(ctx).await.unwrap();
+            msg.delete(ctx).await?;
             return Ok(());
         }
     };
@@ -82,7 +82,7 @@ pub async fn add_reaction_role(
 
     save_config(&cfg)?;
 
-    ctx.say("ReactionRole added successfully").await.unwrap();
+    ctx.say("ReactionRole added successfully").await?;
 
     Ok(())
 }
