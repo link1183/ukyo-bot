@@ -36,6 +36,8 @@ jobs:
           EOF
 
       - name: Run
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             cd ~/bot
