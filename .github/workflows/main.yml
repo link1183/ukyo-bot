@@ -36,10 +36,9 @@ jobs:
           EOF
 
       - name: Run
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            export DATABASE_URL=${{ secrets.DATABASE_URL }}
             cd ~/bot
             tmux has-session -t bot && tmux kill-session -t bot
             tmux new-session -d -s bot './run.sh'
