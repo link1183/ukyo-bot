@@ -22,7 +22,7 @@ pub async fn submit(ctx: Context<'_>, message: String) -> Result<(), Error> {
     };
 
     ctx.say(format!(
-        "The welcome message \"{}\"successfully registered",
+        "The welcome message \"{}\" was successfully registered",
         &message
     ))
     .await?;
