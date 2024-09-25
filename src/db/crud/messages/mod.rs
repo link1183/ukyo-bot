@@ -1,9 +1,9 @@
 use crate::db::entity::{
     messages::ActiveModel as MessageActiveModel, messages::Model as MessageModel,
-    users::Model as UserModel,
+    prelude::Messages, users::Model as UserModel,
 };
 use chrono::prelude::*;
-use sea_orm::{ActiveModelTrait, ActiveValue::Set, DatabaseConnection};
+use sea_orm::{ActiveModelTrait, ActiveValue::Set, DatabaseConnection, EntityTrait};
 
 pub async fn create_message(
     conn: DatabaseConnection,
@@ -20,4 +20,8 @@ pub async fn create_message(
     };
 
     message.insert(&conn).await.unwrap()
+}
+
+pub async fn get_all_messages(conn: DatabaseConnection) -> Vec<MessageModel> {
+    Messages::find().all(&conn).await.unwrap()
 }

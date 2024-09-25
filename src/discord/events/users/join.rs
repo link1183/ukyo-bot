@@ -1,11 +1,16 @@
-use crate::types::{Data, Error};
+use crate::{
+    db::{crud::messages::get_all_messages, get_connection},
+    types::{Data, Error},
+};
 use poise::serenity_prelude::{
     self as serenity, Channel, ChannelId, Context, CreateEmbed, CreateMessage,
 };
-use rand::Rng;
+use rand::{seq::SliceRandom, Rng};
+use regex::Regex;
 use serenity::Member;
 
 pub async fn join(ctx: &Context, data: &Data, new_member: &Member) -> Result<(), Error> {
+    let conn = get_connection().await;
     let config = data.config().clone();
     let events = config.events();
 
@@ -23,8 +28,7 @@ pub async fn join(ctx: &Context, data: &Data, new_member: &Member) -> Result<(),
     let guild_join = events.guild_join.clone().unwrap();
 
     for i in guild_join {
-        // TODO: Implement the messages from the database there
-        let join_message = "Welcome {user} to the boots gang";
+        let join_messages = get_all_messages(conn.clone()).await;
 
         let channel_id = i.channel_id;
         let role_id = i.role_id;
@@ -47,7 +51,24 @@ pub async fn join(ctx: &Context, data: &Data, new_member: &Member) -> Result<(),
         })
         .await?;
 
-        let title = join_message.replace("{user}", new_member.display_name());
+        let join_message = join_messages.choose(&mut rand::thread_rng());
+
+        let message: String = match join_message.is_none() {
+            true => format!(
+                "Welcome {} to the Iron Bootique!",
+                new_member.display_name()
+            ),
+            false => join_message.unwrap().message.clone(),
+        };
+
+        let re = Regex::new(r"\{user\}").unwrap();
+
+        let title = match re.is_match(message.as_str()) {
+            true => &re
+                .replace_all(&message, new_member.display_name())
+                .to_string(),
+            false => &message,
+        };
 
         let embed = CreateEmbed::default()
             .color(serenity::Colour::from_rgb(red, green, blue))
