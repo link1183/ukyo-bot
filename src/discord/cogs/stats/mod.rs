@@ -17,21 +17,25 @@ use crate::{
 pub async fn leaderboard(ctx: Context<'_>) -> Result<(), Error> {
     let conn = get_connection().await;
     let lb = get_leaderboard(conn).await;
-    let mut embed = CreateEmbed::default()
-        .title("Booty leaderboard")
-        .color(0x00FFFF);
+
+    let mut score = String::new();
     for (i, l) in lb.iter().enumerate() {
         let username = ctx
             .http()
             .get_user(UserId::new(l.discord_id))
             .await
             .unwrap();
-        embed = embed.field(
-            format!("{}. {}", i + 1, username),
-            format!("{}%", (l.highest_score * 100.0).round()),
-            false,
-        );
+        score.push_str(&format!(
+            "{}. {}\n**{}%**",
+            i + 1,
+            username,
+            (l.highest_score * 100.0).round()
+        ));
     }
+    let embed = CreateEmbed::default()
+        .title("Booty leaderboard")
+        .color(0x00FFFF)
+        .field("Score", score, true);
 
     let rep = CreateReply::default().embed(embed);
 
@@ -43,21 +47,25 @@ pub async fn leaderboard(ctx: Context<'_>) -> Result<(), Error> {
 pub async fn loserboard(ctx: Context<'_>) -> Result<(), Error> {
     let conn = get_connection().await;
     let lb = get_loserboard(conn).await;
-    let mut embed = CreateEmbed::default()
-        .title("Booty loserboard")
-        .color(0x00FFFF);
+
+    let mut score = String::new();
     for (i, l) in lb.iter().enumerate() {
         let username = ctx
             .http()
             .get_user(UserId::new(l.discord_id))
             .await
             .unwrap();
-        embed = embed.field(
-            format!("{}. {}", i + 1, username.mention()),
-            format!("{}%", (l.lowest_score * 100.0).round()),
-            false,
-        );
+        score.push_str(&format!(
+            "{}. {}\n**{}%**",
+            i + 1,
+            username,
+            (l.lowest_score * 100.0).round()
+        ));
     }
+    let embed = CreateEmbed::default()
+        .title("Booty leaderboard")
+        .color(0x00FFFF)
+        .field("Score", score, true);
 
     let rep = CreateReply::default().embed(embed);
 
