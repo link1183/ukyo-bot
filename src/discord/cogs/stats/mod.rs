@@ -26,12 +26,13 @@ pub async fn leaderboard(ctx: Context<'_>) -> Result<(), Error> {
             .await
             .unwrap();
         score.push_str(&format!(
-            "{}. {}\n**{}%**",
+            "{}. {}\n**{}%**\n\n",
             i + 1,
             username,
             (l.highest_score * 100.0).round()
         ));
     }
+
     let embed = CreateEmbed::default()
         .title("Booty leaderboard")
         .color(0x00FFFF)
@@ -49,19 +50,19 @@ pub async fn loserboard(ctx: Context<'_>) -> Result<(), Error> {
     let lb = get_loserboard(conn).await;
 
     let mut score = String::new();
+
     for (i, l) in lb.iter().enumerate() {
-        let username = ctx
-            .http()
-            .get_user(UserId::new(l.discord_id))
-            .await
-            .unwrap();
-        score.push_str(&format!(
-            "{}. {}\n**{}%**",
-            i + 1,
-            username,
-            (l.lowest_score * 100.0).round()
-        ));
+        if let Ok(username) = ctx.http().get_user(UserId::new(l.discord_id)).await {
+            let formatted_score = format!(
+                "{}. {}\n**{}%**\n\n",
+                i + 1,
+                username,
+                (l.lowest_score * 100.0).round()
+            );
+            score.push_str(&formatted_score);
+        }
     }
+
     let embed = CreateEmbed::default()
         .title("Booty leaderboard")
         .color(0x00FFFF)
