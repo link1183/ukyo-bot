@@ -50,7 +50,7 @@ pub async fn boot(ctx: Context<'_>) -> Result<(), Error> {
         create_user(conn.clone(), user_id.get()).await;
     };
 
-    create_boot(user_db.unwrap(), random_number).await;
+    create_boot(conn.clone(), user_db.unwrap(), random_number).await;
 
     Ok(())
 }

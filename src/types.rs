@@ -17,13 +17,7 @@ impl Data {
 #[derive(Debug, FromQueryResult)]
 pub struct Leaderboard {
     pub discord_id: u64,
-    pub highest_score: f64,
-}
-
-#[derive(Debug, FromQueryResult)]
-pub struct Loserboard {
-    pub discord_id: u64,
-    pub lowest_score: f64,
+    pub score: f64,
 }
 
 pub type Error = Box<dyn StdError + Send + Sync>;

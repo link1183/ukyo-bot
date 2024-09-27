@@ -1,4 +1,4 @@
-use std::cmp::Ordering;
+use std::{cmp::Ordering, collections::HashMap};
 
 use poise::{
     serenity_prelude::{self as serenity, CreateEmbed, Mentionable, UserId},
@@ -7,66 +7,94 @@ use poise::{
 
 use crate::{
     db::{
-        crud::boot::{get_all_boots_by_discord_id, get_leaderboard, get_loserboard},
+        crud::boot::{get_all_boots_by_discord_id, get_leaderboard},
         get_connection,
     },
     types::{Context, Error},
 };
 
+#[derive(poise::ChoiceParameter)]
+enum LeaderboardOrder {
+    #[name = "winner"]
+    Winner,
+    #[name = "loser"]
+    Loser,
+}
+
 #[poise::command(slash_command, guild_only)]
-pub async fn leaderboard(ctx: Context<'_>) -> Result<(), Error> {
+pub async fn board(ctx: Context<'_>, order: LeaderboardOrder) -> Result<(), Error> {
     let conn = get_connection().await;
     let lb = get_leaderboard(conn).await;
 
+    // TODO: Process the leaderboard object based on the order
+    let mut scores_by_user: HashMap<u64, Vec<f64>> = HashMap::new();
+    for entry in lb {
+        scores_by_user
+            .entry(entry.discord_id)
+            .or_default()
+            .push(entry.score);
+    }
+
+    let title = match order {
+        LeaderboardOrder::Winner => "Booty leaderboard",
+        LeaderboardOrder::Loser => "Booty loserboard",
+    };
+
+    // Highest/lowest score calculation
     let mut score = String::new();
-    for (i, l) in lb.iter().enumerate() {
-        let username = ctx
-            .http()
-            .get_user(UserId::new(l.discord_id))
-            .await
-            .unwrap();
+    for (i, (discord_id, scores)) in scores_by_user.iter().enumerate() {
+        // Highest/lowest score
+        let mut sorted_scores = scores.clone();
+        sorted_scores.sort_by(|a, b| b.partial_cmp(a).unwrap());
+
+        let top_scores: Vec<f64> = match order {
+            LeaderboardOrder::Winner => sorted_scores.iter().take(10).cloned().collect(),
+            LeaderboardOrder::Loser => sorted_scores.iter().rev().take(10).cloned().collect(),
+        };
+
+        let username = ctx.http().get_user(UserId::new(*discord_id)).await.unwrap();
+        let used_score: f64 = match order {
+            LeaderboardOrder::Winner => top_scores.iter().cloned().fold(f64::MIN, f64::max),
+            LeaderboardOrder::Loser => top_scores.iter().cloned().fold(f64::MAX, f64::min),
+        };
         score.push_str(&format!(
-            "{}. {}\n**{}%**\n\n",
+            "{}. {}\n**{}%**\n",
             i + 1,
             username,
-            (l.highest_score * 100.0).round()
+            (used_score * 100.0).round()
+        ));
+    }
+
+    let mut average_score_array: HashMap<u64, f64> = HashMap::new();
+    for (discord_id, scores) in scores_by_user {
+        let average_score = scores.iter().sum::<f64>() / scores.len() as f64;
+        average_score_array.insert(discord_id, average_score);
+    }
+
+    let mut sorted_avg_scores: Vec<(u64, f64)> = average_score_array.into_iter().collect();
+    sorted_avg_scores.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
+
+    let avg_scores: Vec<(u64, f64)> = match order {
+        LeaderboardOrder::Winner => sorted_avg_scores.iter().take(10).cloned().collect(),
+        LeaderboardOrder::Loser => sorted_avg_scores.iter().rev().take(10).cloned().collect(),
+    };
+
+    let mut avg = String::new();
+    for (i, (discord_id, average_score)) in avg_scores.iter().enumerate() {
+        let username = ctx.http().get_user(UserId::new(*discord_id)).await.unwrap();
+        avg.push_str(&format!(
+            "{}. {}\n**{}%**\n",
+            i + 1,
+            username,
+            (average_score * 10000.0).round() / 100.0
         ));
     }
 
     let embed = CreateEmbed::default()
-        .title("Booty leaderboard")
+        .title(title)
         .color(0x00FFFF)
-        .field("Score", score, true);
-
-    let rep = CreateReply::default().embed(embed);
-
-    ctx.send(rep).await?;
-    Ok(())
-}
-
-#[poise::command(slash_command, guild_only)]
-pub async fn loserboard(ctx: Context<'_>) -> Result<(), Error> {
-    let conn = get_connection().await;
-    let lb = get_loserboard(conn).await;
-
-    let mut score = String::new();
-
-    for (i, l) in lb.iter().enumerate() {
-        if let Ok(username) = ctx.http().get_user(UserId::new(l.discord_id)).await {
-            let formatted_score = format!(
-                "{}. {}\n**{}%**\n\n",
-                i + 1,
-                username,
-                (l.lowest_score * 100.0).round()
-            );
-            score.push_str(&formatted_score);
-        }
-    }
-
-    let embed = CreateEmbed::default()
-        .title("Booty leaderboard")
-        .color(0x00FFFF)
-        .field("Score", score, true);
+        .field("Score", score, true)
+        .field("Average", avg, true);
 
     let rep = CreateReply::default().embed(embed);
 

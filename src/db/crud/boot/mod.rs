@@ -1,23 +1,20 @@
 use crate::{
-    db::{
-        entity::{
-            boot::{self, ActiveModel as BootActiveModel, Model as BootModel},
-            prelude::{Boot, Users},
-            users::{self, Model as UserModel},
-        },
-        get_connection,
+    db::entity::{
+        boot::{self, ActiveModel as BootActiveModel, Model as BootModel},
+        prelude::{Boot, Users},
+        users::{self, Model as UserModel},
     },
-    types::{Leaderboard, Loserboard},
+    types::Leaderboard,
 };
 use chrono::prelude::*;
 use sea_orm::{
-    sea_query::Expr, ActiveModelTrait, ActiveValue::Set, ColumnTrait, DatabaseConnection,
-    EntityTrait, QueryFilter, QueryOrder, QuerySelect,
+    ActiveModelTrait, ActiveValue::Set, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter,
+    QuerySelect,
 };
 
 use super::users::get_user_by_discord_id;
 
-pub async fn create_boot(user: UserModel, prob: f64) -> BootModel {
+pub async fn create_boot(conn: DatabaseConnection, user: UserModel, prob: f64) -> BootModel {
     let now = Utc::now().naive_utc();
 
     let boot = BootActiveModel {
@@ -27,34 +24,16 @@ pub async fn create_boot(user: UserModel, prob: f64) -> BootModel {
         ..Default::default()
     };
 
-    boot.insert(&get_connection().await).await.unwrap()
+    boot.insert(&conn).await.unwrap()
 }
 
 pub async fn get_leaderboard(conn: DatabaseConnection) -> Vec<Leaderboard> {
     Users::find()
         .column(users::Column::Id)
         .column(users::Column::DiscordId)
-        .expr_as(Expr::col(boot::Column::Score).max(), "highest_score")
+        .column(boot::Column::Score)
         .inner_join(Boot)
-        .group_by(users::Column::Id)
-        .group_by(users::Column::DiscordId)
-        .order_by_desc(Expr::col(boot::Column::Score).max())
         .into_model::<Leaderboard>()
-        .all(&conn)
-        .await
-        .unwrap()
-}
-
-pub async fn get_loserboard(conn: DatabaseConnection) -> Vec<Loserboard> {
-    Users::find()
-        .column(users::Column::Id)
-        .column(users::Column::DiscordId)
-        .expr_as(Expr::col(boot::Column::Score).min(), "lowest_score")
-        .inner_join(Boot)
-        .group_by(users::Column::Id)
-        .group_by(users::Column::DiscordId)
-        .order_by_asc(Expr::col(boot::Column::Score).min())
-        .into_model::<Loserboard>()
         .all(&conn)
         .await
         .unwrap()
