@@ -10,7 +10,7 @@ use crate::{
         crud::boot::{get_all_boots_by_discord_id, get_leaderboard},
         get_connection,
     },
-    types::{Context, Error, Leaderboard},
+    types::{Context, Error},
 };
 
 #[derive(poise::ChoiceParameter)]
@@ -22,8 +22,7 @@ enum LeaderboardOrder {
 }
 
 #[poise::command(slash_command, guild_only)]
-pub async fn board(ctx: Context<'_>) -> Result<(), Error> {
-    let order = LeaderboardOrder::Winner;
+pub async fn lb(ctx: Context<'_>, order: LeaderboardOrder) -> Result<(), Error> {
     let conn = get_connection().await;
     let lb = get_leaderboard(conn).await;
 
