@@ -26,67 +26,73 @@ pub async fn board(ctx: Context<'_>, order: LeaderboardOrder) -> Result<(), Erro
     let conn = get_connection().await;
     let lb = get_leaderboard(conn).await;
 
-    // TODO: Process the leaderboard object based on the order
-    let mut scores_by_user: HashMap<u64, Vec<f64>> = HashMap::new();
+    let mut scores_by_user: HashMap<u64, Vec<i32>> = HashMap::new();
     for entry in lb {
         scores_by_user
             .entry(entry.discord_id)
             .or_default()
-            .push(entry.score);
+            .push((entry.score * 100.0).round() as i32);
     }
 
-    let title = match order {
-        LeaderboardOrder::Winner => "Booty leaderboard",
-        LeaderboardOrder::Loser => "Booty loserboard",
+    let (title, is_winner) = match order {
+        LeaderboardOrder::Winner => ("Booty leaderboard", true),
+        LeaderboardOrder::Loser => ("Booty loserboard", false),
     };
 
-    // Highest/lowest score calculation
+    let mut sorted_users: Vec<_> = scores_by_user.into_iter().collect();
+    sorted_users.sort_by(|(_, a_scores), (_, b_scores)| {
+        let a_score = if is_winner {
+            *a_scores.iter().max().unwrap()
+        } else {
+            *a_scores.iter().min().unwrap()
+        };
+        let b_score = if is_winner {
+            *b_scores.iter().max().unwrap()
+        } else {
+            *b_scores.iter().min().unwrap()
+        };
+        if is_winner {
+            b_score.cmp(&a_score)
+        } else {
+            a_score.cmp(&b_score)
+        }
+    });
+
     let mut score = String::new();
-    for (i, (discord_id, scores)) in scores_by_user.iter().enumerate() {
-        // Highest/lowest score
-        let mut sorted_scores = scores.clone();
-        sorted_scores.sort_by(|a, b| b.partial_cmp(a).unwrap());
-
-        let top_scores: Vec<f64> = match order {
-            LeaderboardOrder::Winner => sorted_scores.iter().take(10).cloned().collect(),
-            LeaderboardOrder::Loser => sorted_scores.iter().rev().take(10).cloned().collect(),
-        };
-
-        let username = ctx.http().get_user(UserId::new(*discord_id)).await.unwrap();
-        let used_score: f64 = match order {
-            LeaderboardOrder::Winner => top_scores.iter().cloned().fold(f64::MIN, f64::max),
-            LeaderboardOrder::Loser => top_scores.iter().cloned().fold(f64::MAX, f64::min),
-        };
-        score.push_str(&format!(
-            "{}. {}\n**{}%**\n",
-            i + 1,
-            username,
-            (used_score * 100.0).round()
-        ));
-    }
-
-    let mut average_score_array: HashMap<u64, f64> = HashMap::new();
-    for (discord_id, scores) in scores_by_user {
-        let average_score = scores.iter().sum::<f64>() / scores.len() as f64;
-        average_score_array.insert(discord_id, average_score);
-    }
-
-    let mut sorted_avg_scores: Vec<(u64, f64)> = average_score_array.into_iter().collect();
-    sorted_avg_scores.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
-
-    let avg_scores: Vec<(u64, f64)> = match order {
-        LeaderboardOrder::Winner => sorted_avg_scores.iter().take(10).cloned().collect(),
-        LeaderboardOrder::Loser => sorted_avg_scores.iter().rev().take(10).cloned().collect(),
-    };
-
     let mut avg = String::new();
-    for (i, (discord_id, average_score)) in avg_scores.iter().enumerate() {
-        let username = ctx.http().get_user(UserId::new(*discord_id)).await.unwrap();
+
+    let mut avg_sorted_users = sorted_users.clone();
+    avg_sorted_users.sort_by(|(_, a_scores), (_, b_scores)| {
+        let a_avg = a_scores.iter().sum::<i32>() as f64 / a_scores.len() as f64;
+        let b_avg = b_scores.iter().sum::<i32>() as f64 / b_scores.len() as f64;
+        if is_winner {
+            b_avg.partial_cmp(&a_avg).unwrap()
+        } else {
+            a_avg.partial_cmp(&b_avg).unwrap()
+        }
+    });
+
+    for (i, (discord_id, scores)) in sorted_users.iter().take(10).enumerate() {
+        let username = ctx.http().get_user(UserId::new(*discord_id)).await?;
+        let used_score = if is_winner {
+            *scores.iter().max().unwrap()
+        } else {
+            *scores.iter().min().unwrap()
+        };
+
+        score.push_str(&format!("{}. {}\n**{}%**\n", i + 1, username, used_score));
+    }
+
+    for (i, (discord_id, scores)) in avg_sorted_users.iter().take(10).enumerate() {
+        let username = ctx.http().get_user(UserId::new(*discord_id)).await?;
+        let average_score =
+            (scores.iter().sum::<i32>() as f64 / scores.len() as f64 * 100.0).round() / 100.0;
+
         avg.push_str(&format!(
-            "{}. {}\n**{}%**\n",
+            "{}. {}\n**{:.2}%**\n",
             i + 1,
             username,
-            (average_score * 10000.0).round() / 100.0
+            average_score
         ));
     }
 
@@ -99,6 +105,7 @@ pub async fn board(ctx: Context<'_>, order: LeaderboardOrder) -> Result<(), Erro
     let rep = CreateReply::default().embed(embed);
 
     ctx.send(rep).await?;
+
     Ok(())
 }
 
@@ -128,7 +135,7 @@ pub async fn stats(ctx: Context<'_>, user: Option<serenity::UserId>) -> Result<(
 
     let total_score: f64 = boots.iter().map(|boot| (boot.score * 100.0).round()).sum();
 
-    let average_score = (total_score.round() / (boots.len() as f64) * 100.0).round() / 100.0;
+    let average_score = total_score.round() / boots.len() as f64;
     let min = (boots
         .iter()
         .min_by(|a, b| a.score.partial_cmp(&b.score).unwrap_or(Ordering::Equal))
@@ -152,7 +159,7 @@ pub async fn stats(ctx: Context<'_>, user: Option<serenity::UserId>) -> Result<(
         .field("Count", count.to_string(), false)
         .field("Lowest boot", format!("{}%", min), false)
         .field("Highest boot", format!("{}%", max), false)
-        .field("Average boot", format!("{}%", average_score), false)
+        .field("Average boot", format!("{:.2}%", average_score), false)
         .field("Number of 69", number_of_69.len().to_string(), false);
 
     let rep = CreateReply::default().embed(embed);
