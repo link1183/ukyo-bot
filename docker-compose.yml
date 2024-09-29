@@ -1,0 +1,31 @@
+services:
+  bot:
+    build:
+      context: ./bot-ukyo
+      dockerfile: Dockerfile
+    env_file: ./bot-ukyo/.env
+    volumes:
+      - ~/.config/ukyo-bot:/root/.config/ukyo-bot
+    depends_on:
+      - db
+    networks:
+      - bot_network
+
+  db:
+    build:
+      context: ./mysql
+      dockerfile: Dockerfile
+    env_file: ./mysql/.env
+    ports:
+      - "127.0.0.1:3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - bot_network
+
+volumes:
+  mysql_data:
+
+networks:
+  bot_network:
+    driver: bridge

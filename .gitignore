@@ -1,3 +1,1 @@
-/target
-.envrc
-Cargo.lock
+mysql/.env

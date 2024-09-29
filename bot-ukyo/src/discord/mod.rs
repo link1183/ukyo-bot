@@ -26,8 +26,6 @@ pub async fn discord_bot(config: Config) -> Result<(), Error> {
         ..Default::default()
     };
 
-    dbg!(&options.commands);
-
     let config_clone = config.clone();
 
     let framework = poise::Framework::builder()

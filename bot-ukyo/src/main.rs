@@ -8,7 +8,7 @@ async fn main() -> Result<(), confy::ConfyError> {
     let cfg = config::load_config();
 
     if let Err(e) = discord::discord_bot(cfg).await {
-        eprintln!("Error happened while handling the discord bot: {}", e);
+        eprintln!("Error occured while handling the discord bot: {}", e);
     };
 
     Ok(())
