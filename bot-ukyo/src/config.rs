@@ -62,7 +62,6 @@ pub fn load_config() -> Config {
 
     // Default config path: ~/.config/{app_name}/{config_name}.yml
     let cfg: Config = confy::load(app_name, config_name).unwrap();
-    dbg!(&cfg);
     cfg
 }
 

@@ -1,4 +1,4 @@
-FROM mysql:9.0.1
+FROM mysql:8.0
 
 COPY ./ukyo_bot_dump.sql /docker-entrypoint-initdb.d/
 
