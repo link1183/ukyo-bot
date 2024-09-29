@@ -1,1 +1,4 @@
 mysql/.env
+bot-ukyo/.env
+bot-ukyo/target/
+bot-ukyo/Cargo.lock
