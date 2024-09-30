@@ -1,5 +1,6 @@
 use poise::serenity_prelude::{self as serenity, FullEvent};
 
+mod messages;
 mod reactions;
 mod ready;
 mod users;
@@ -24,6 +25,9 @@ pub async fn event_handler(
         }
         FullEvent::GuildMemberAddition { new_member } => {
             users::join(ctx, data, new_member).await?;
+        }
+        FullEvent::Message { new_message } => {
+            messages::message(ctx, new_message).await?;
         }
         _ => {}
     }
