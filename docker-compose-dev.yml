@@ -3,7 +3,7 @@ services:
     build:
       context: ./bot-ukyo
       dockerfile: Dockerfile
-    env_file: ./bot-ukyo/.envp
+    env_file: ./bot-ukyo/.envd
     volumes:
       - ~/.config/ukyo-bot:/root/.config/ukyo-bot
     depends_on:
