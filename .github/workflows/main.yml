@@ -26,22 +26,7 @@ jobs:
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             cd ~/bot
             git pull origin main
-          EOF
-
-      - name: Build
-        run: |
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-            cd ~/bot
-            cargo build --release
-          EOF
-
-      - name: Run
-        run: |
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-            export DATABASE_URL=${{ secrets.DATABASE_URL }}
-            cd ~/bot
-            tmux has-session -t bot && tmux kill-session -t bot
-            tmux new-session -d -s bot './run.sh'
+            ./run.sh
           EOF
 
       - name: Cleanup
