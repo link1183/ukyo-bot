@@ -23,6 +23,18 @@ services:
     networks:
       - bot_network
 
+  mysqld_exporter:
+    image: prom/mysqld-exporter
+    container_name: mysqld_exporter
+    ports:
+      - "9104:9104"
+    environment:
+      - DATA_SOURCE_NAME=exporter:password@(db:3306)/
+    depends_on:
+      - db
+    networks:
+      - bot_network
+
 volumes:
   mysql_data:
 
