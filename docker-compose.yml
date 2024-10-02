@@ -8,6 +8,7 @@ services:
       - ~/.config/ukyo-bot:/root/.config/ukyo-bot
     depends_on:
       - db
+    restart: unless-stopped
     networks:
       - bot_network
 
@@ -20,18 +21,7 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-    networks:
-      - bot_network
-
-  mysqld_exporter:
-    image: prom/mysqld-exporter
-    container_name: mysqld_exporter
-    ports:
-      - "9104:9104"
-    environment:
-      - DATA_SOURCE_NAME=exporter:exporter_password@(db:3306)/
-    depends_on:
-      - db
+    restart: unless-stopped
     networks:
       - bot_network
 
