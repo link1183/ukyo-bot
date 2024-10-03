@@ -13,14 +13,15 @@ services:
       - network
 
   db:
-    image: mysql:8.0
+    image: container-registry.oracle.com/mysql/community-server:9.0
     env_file: ./mysql/.env
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./mysql/init_scripts:/docker-entrypoint-initdb.d
-    restart: unless-stopped
+      - ./mysql/my.cnf:/etc/my.cnf
+      - ./mysql/init_scripts/:/docker-entrypoint-initdb.d/
+    restart: on-failure
     networks:
       - network
       - grafana_monitoring
