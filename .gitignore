@@ -4,3 +4,4 @@ bot-ukyo/target/
 bot-ukyo/Cargo.lock
 bot-ukyo/.envd
 bot-ukyo/.envp
+mysql/init_scripts/init.sql

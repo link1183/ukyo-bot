@@ -1,5 +1,5 @@
 # Builder stage
-FROM rust:1.81.0 as builder
+FROM rust:1.81.0 AS builder
 WORKDIR /usr/src/bot-ukyo
 COPY . .
 
