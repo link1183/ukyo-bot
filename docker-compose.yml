@@ -14,6 +14,7 @@ services:
 
   db:
     image: container-registry.oracle.com/mysql/community-server:9.0
+    platform: linux/amd64
     env_file: ./mysql/.env
     ports:
       - "3306:3306"
