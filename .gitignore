@@ -5,3 +5,4 @@ bot-ukyo/Cargo.lock
 bot-ukyo/.envd
 bot-ukyo/.envp
 mysql/init_scripts/init.sql
+mysql/init_scripts/01-Users.sql

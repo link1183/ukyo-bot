@@ -13,15 +13,13 @@ services:
       - network
 
   db:
-    build:
-      context: ./mysql
-      dockerfile: Dockerfile
+    image: mysql:8.0
     env_file: ./mysql/.env
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./init-scripts:/docker-entrypoint-initdb.d
+      - ./init_scripts:/docker-entrypoint-initdb.d
     restart: unless-stopped
     networks:
       - network
